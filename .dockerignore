@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+**/dist
+**/build
+**/coverage
+.git
+.github
+.vite
+.cache
+.env
+.env.*
+!.env.example
+data
+*.log
+docs
+prompt.md

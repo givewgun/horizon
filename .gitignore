@@ -1,0 +1,16 @@
+node_modules
+dist
+build
+coverage
+.vite
+.cache
+.turbo
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+data
+*.sqlite
+*.sqlite-journal
+*.db
