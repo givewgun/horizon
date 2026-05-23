@@ -13,7 +13,7 @@ export function Shell(): JSX.Element {
       <header className="flex items-center justify-between border-b border-mission-edge bg-mission-panel/60 px-4 py-2">
         <div>
           <div className="font-mono text-sm font-semibold uppercase tracking-widest text-mission-accent">
-            Orbit &amp; Atmosphere
+            Horizon
           </div>
           <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
             mission control · phase 0

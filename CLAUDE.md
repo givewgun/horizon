@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Project-specific guidance for Claude Code on **Orbit & Atmosphere** (a live SPACE + EARTH dashboard with Telegram launch alerts). The original brief is in `prompt.md`; the current "you are here" pointer is `docs/HANDOVER.md`.
+Project-specific guidance for Claude Code on **Horizon** (a live SPACE + EARTH dashboard with Telegram launch alerts). The original brief is in `prompt.md`; the current "you are here" pointer is `docs/HANDOVER.md`.
 
 ## What this project is
 

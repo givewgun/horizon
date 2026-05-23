@@ -1,4 +1,4 @@
-# Orbit & Atmosphere
+# Horizon
 
 A live SPACE + EARTH dashboard with two selectable modes, deployed as a single Docker container behind a Cloudflare Tunnel.
 
