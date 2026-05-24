@@ -1,50 +1,32 @@
-import { useQuery } from '@tanstack/react-query';
-import type { Webcam } from '@horizon/shared';
-import { apiGet } from '../../lib/api.js';
+import { useMemo } from 'react';
 import { useLocation } from '../../context/LocationContext.js';
 import { StatusBadge } from '../../components/common/StatusBadge.js';
-import { Skeleton } from '../../components/common/Skeleton.js';
-import { FeedFallback } from '../../components/common/FeedFallback.js';
 
+/**
+ * Embeds Windy's public map with the `webcams` overlay enabled, centred on the
+ * user's current location. Windy returns real, kept-alive webcam pins. The
+ * embed works without an API key — clicking a pin opens the webcam page on
+ * windy.com in a new tab from inside the iframe.
+ */
 export function CityWebcams(): JSX.Element {
   const { location } = useLocation();
 
-  const { data: webcams, isLoading, error } = useQuery<Webcam[]>({
-    queryKey: ['webcams', location.lat, location.lon],
-    queryFn: () =>
-      apiGet<Webcam[]>(`/webcams?lat=${location.lat}&lon=${location.lon}&radius=500`),
-    refetchInterval: 60 * 60 * 1000,
-  });
-
-  if (isLoading) {
-    return (
-      <section className="rounded-lg border border-mission-edge bg-mission-panel/60 p-4">
-        <header className="mb-3 flex items-center justify-between">
-          <h2 className="font-mono text-xs uppercase tracking-widest text-slate-200">
-            City webcams
-          </h2>
-          <StatusBadge status="SNAPSHOT" />
-        </header>
-        <Skeleton rows={3} />
-      </section>
-    );
-  }
-
-  if (error || !webcams) {
-    return (
-      <section className="rounded-lg border border-mission-edge bg-mission-panel/60 p-4">
-        <header className="mb-3 flex items-center justify-between">
-          <h2 className="font-mono text-xs uppercase tracking-widest text-slate-200">
-            City webcams
-          </h2>
-          <StatusBadge status="SNAPSHOT" />
-        </header>
-        <FeedFallback feedName="webcams" />
-      </section>
-    );
-  }
-
-  const isLiveWindy = webcams.some((c) => c.provider === 'windy');
+  const src = useMemo(() => {
+    const params = new URLSearchParams({
+      type: 'map',
+      location: 'coordinates',
+      metricRain: 'mm',
+      metricTemp: '°C',
+      metricWind: 'km/h',
+      zoom: '7',
+      overlay: 'webcams',
+      product: 'ecmwf',
+      level: 'surface',
+      lat: location.lat.toFixed(4),
+      lon: location.lon.toFixed(4),
+    });
+    return `https://embed.windy.com/embed.html?${params.toString()}`;
+  }, [location.lat, location.lon]);
 
   return (
     <section className="rounded-lg border border-mission-edge bg-mission-panel/60 p-4">
@@ -52,49 +34,38 @@ export function CityWebcams(): JSX.Element {
         <h2 className="font-mono text-xs uppercase tracking-widest text-slate-200">
           City webcams
         </h2>
-        <StatusBadge status={isLiveWindy ? 'LIVE' : 'SNAPSHOT'} />
+        <StatusBadge status="LIVE" />
       </header>
 
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        {webcams.slice(0, 6).map((cam) => {
-          const href = cam.playerUrl ?? `https://www.youtube.com/watch?v=${cam.id.replace(/^yt-/, '')}`;
-          return (
-            <a
-              key={cam.id}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group overflow-hidden rounded border border-slate-700 bg-slate-900/50 transition-colors hover:border-mission-accent"
-            >
-              <div className="relative aspect-video bg-black">
-                {cam.thumbnailUrl ? (
-                  <img
-                    src={cam.thumbnailUrl}
-                    alt={cam.title}
-                    className="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-100"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-slate-600">
-                    no thumbnail
-                  </div>
-                )}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-2">
-                  <div className="truncate text-xs font-semibold text-slate-100">{cam.title}</div>
-                  <div className="truncate text-[10px] text-slate-400">
-                    {cam.location.city ?? ''}
-                    {cam.location.country ? ` · ${cam.location.country}` : ''}
-                  </div>
-                </div>
-              </div>
-            </a>
-          );
-        })}
+      <div className="mb-2 text-xs text-slate-400">
+        Live webcam pins near{' '}
+        <span className="text-slate-200">
+          {location.label ?? `${location.lat.toFixed(2)}°, ${location.lon.toFixed(2)}°`}
+        </span>
+        . Click a pin → opens the cam.
+      </div>
+
+      <div className="overflow-hidden rounded border border-slate-700">
+        <iframe
+          key={src}
+          src={src}
+          title="Windy webcams"
+          className="block h-96 w-full border-0"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+        />
       </div>
 
       <div className="mt-2 text-[10px] text-slate-500">
-        {isLiveWindy
-          ? `Source: Windy webcams · ${webcams.length} near you`
-          : 'Curated 24/7 YouTube live streams (set WINDY_KEY for nearby webcams).'}
+        Powered by{' '}
+        <a
+          href="https://www.windy.com/-Webcams/webcams"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-slate-300"
+        >
+          Windy.com
+        </a>
       </div>
     </section>
   );
