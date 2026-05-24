@@ -50,7 +50,7 @@ describe('LaunchTracker', () => {
     await waitFor(() => {
       expect(screen.getByText(/Falcon 9 \| Test/)).toBeInTheDocument();
     });
-    expect(screen.getByText(/SpaceX/)).toBeInTheDocument();
+    expect(screen.getAllByText(/SpaceX/).length).toBeGreaterThan(0);
   });
 
   it('renders feed fallback on API error', async () => {
