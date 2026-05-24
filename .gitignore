@@ -10,6 +10,8 @@ coverage
 .env
 .env.*
 !.env.example
+!.env.production.example
+.claude/
 data
 *.sqlite
 *.sqlite-journal

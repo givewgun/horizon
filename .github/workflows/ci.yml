@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
 
 concurrency:
@@ -40,3 +40,56 @@ jobs:
 
       - name: test
         run: pnpm -r test
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [verify]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t horizon:latest .
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Deploy to Oracle Cloud VM
+        uses: appleboy/ssh-action@v1
+        env:
+          OPENWEATHER_KEY: ${{ secrets.OPENWEATHER_KEY }}
+          WINDY_KEY: ${{ secrets.WINDY_KEY }}
+          N2YO_KEY: ${{ secrets.N2YO_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        with:
+          host: ${{ secrets.ORACLE_VM_HOST }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          port: 22
+          envs: OPENWEATHER_KEY,WINDY_KEY,N2YO_KEY,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID
+          script: |
+            set -euo pipefail
+            cd /opt/horizon/app
+            sudo git pull origin master
+
+            # Generate .env.production from secrets each deploy.
+            # Keeps the file in sync with the GitHub Secrets source of truth.
+            sudo tee .env.production > /dev/null <<EOF
+            NODE_ENV=production
+            PORT=8080
+            LL2_BASE=https://ll.thespacedevs.com/2.3.0
+            OPENWEATHER_KEY=${OPENWEATHER_KEY}
+            WINDY_KEY=${WINDY_KEY}
+            N2YO_KEY=${N2YO_KEY}
+            TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+            TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+            NOMINATIM_USER_AGENT=horizon/1.0 (contact: aongoong.jp@gmail.com)
+            DB_PATH=/app/data/horizon.sqlite
+            EOF
+            sudo chmod 600 .env.production
+
+            sudo docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+            sudo docker system prune -f
+            echo "Deploy complete at $(date)"

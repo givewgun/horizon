@@ -75,6 +75,16 @@ Tests to add in Phase 2:
 - ISS HD Earth periodically shows a blue/standby card. We can't detect that from inside the YouTube iframe (cross-origin), so we expose a manual "show fallback" toggle. Don't try to scrape the iframe.
 - The Night-Sky catalog only covers 12 constellations by design (ADR-0003). Adding more is a JSON edit — no code change.
 
+## Deployment (Oracle VM via Cloudflare Tunnel)
+
+Mirrors gunvest. See ADR-0006.
+
+- Production compose: `docker-compose.prod.yml` (no host port, joins external `tunnel-gateway` network, container_name `horizon-app`).
+- Cloudflare Zero Trust Public Hostname: `horizon.givewgun.com → http://horizon-app:8080`.
+- CI deploys on push to `master`: `verify → docker build → ssh deploy`. The deploy job regenerates `.env.production` on the VM from GitHub Secrets every run, so the VM never holds a stale or hand-edited env file.
+- Bootstrap a fresh VM with `scripts/oracle-vm-setup.sh <GITHUB_TOKEN>`. Idempotent — skips Docker + `tunnel-gateway` if already provisioned by gunvest.
+- Required GitHub Secrets: `ORACLE_VM_HOST`, `ORACLE_VM_SSH_KEY`, `OPENWEATHER_KEY`, `WINDY_KEY`, `N2YO_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`. Missing key → panel disables itself (ADR-0001 / ADR-0004).
+
 ## Useful local commands
 
 ```bash
