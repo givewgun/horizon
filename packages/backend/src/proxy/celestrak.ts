@@ -20,7 +20,7 @@ function parseTle(catnr: number, raw: string): TLE {
   if (lines.length < 3) {
     throw new UpstreamError(`celestrak: invalid TLE payload for ${catnr}`);
   }
-  const [name, line1, line2] = lines;
+  const [name, line1, line2] = lines as [string, string, string];
   if (!line1.startsWith('1 ') || !line2.startsWith('2 ')) {
     throw new UpstreamError(`celestrak: malformed TLE lines for ${catnr}`);
   }

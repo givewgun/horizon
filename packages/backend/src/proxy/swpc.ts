@@ -106,7 +106,7 @@ async function fetchPlasma(): Promise<SolarWindSnapshot | null> {
   try {
     const body = (await fetchUpstream(PLASMA_URL)) as Row[];
     if (!Array.isArray(body) || body.length < 2) return null;
-    const header = body[0];
+    const header = body[0]!;
     const tIdx = findColumn(header, ['time']);
     const speedIdx = findColumn(header, ['speed']);
     const densIdx = findColumn(header, ['density']);
@@ -126,7 +126,7 @@ async function fetchBz(): Promise<number | null> {
   try {
     const body = (await fetchUpstream(MAG_URL)) as Row[];
     if (!Array.isArray(body) || body.length < 2) return null;
-    const header = body[0];
+    const header = body[0]!;
     const bzIdx = findColumn(header, ['bz_gsm', 'bz']);
     if (bzIdx < 0) return null;
     const last = body.at(-1);
@@ -165,6 +165,7 @@ async function fetchXray(): Promise<XrayFluxSnapshot | null> {
     let time = '';
     for (let i = body.length - 1; i >= 0 && (Number.isNaN(shortWm2) || Number.isNaN(longWm2)); i -= 1) {
       const row = body[i];
+      if (!row) continue;
       const energy = String(row.energy ?? '').toLowerCase();
       const flux = pickNumber(row.flux);
       if (flux === null) continue;
@@ -227,8 +228,8 @@ export class SwpcClient {
         current,
         forecast: future.slice(0, 24),
         auroraLikelihood: auroraLikelihood(current.kp, Math.abs(latitude), wind?.bzNt ?? null),
-        solarWind: wind,
-        xray: xray ?? undefined,
+        ...(wind !== undefined && { solarWind: wind }),
+        ...(xray !== null && { xray }),
         fetchedAt: new Date().toISOString(),
       };
     });

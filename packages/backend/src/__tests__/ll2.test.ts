@@ -62,7 +62,7 @@ describe('normalizeLaunch', () => {
         { url: 'https://youtube.com/watch?v=AAA', priority: 1, type: 'YouTube' },
       ],
     });
-    expect(out.webcasts[0].url).toContain('AAA');
+    expect(out.webcasts[0]!.url).toContain('AAA');
     expect(out.webcastLive).toBe(true);
   });
 

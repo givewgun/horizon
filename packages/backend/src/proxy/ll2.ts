@@ -90,8 +90,8 @@ function pickWebcasts(raw: LL2VidUrl[] | undefined): Webcast[] {
     out.push({
       url: v.url,
       type,
-      title: typeof v.title === 'string' ? v.title : undefined,
-      priority: typeof v.priority === 'number' ? v.priority : undefined,
+      ...(typeof v.title === 'string' && { title: v.title }),
+      ...(typeof v.priority === 'number' && { priority: v.priority }),
     });
   }
   // Lower priority number = higher importance in LL2.
@@ -120,30 +120,36 @@ export function normalizeLaunch(src: LL2Launch): Launch {
       abbrev: src.status?.abbrev ?? 'TBD',
       name: src.status?.name ?? 'To Be Determined',
     },
-    provider: { name: provider, type: providerType },
-    rocket: { name: rocketName },
-    mission: src.mission
-      ? {
-          name: src.mission.name,
-          description: src.mission.description,
-          orbit,
-          type: src.mission.type,
-        }
-      : undefined,
-    pad: {
-      name: src.pad?.name ?? 'Unknown pad',
-      locationName: src.pad?.location?.name,
-      countryCode: src.pad?.location?.country_code,
-      latitude: asNumber(src.pad?.latitude),
-      longitude: asNumber(src.pad?.longitude),
+    provider: {
+      name: provider,
+      ...(providerType !== undefined && { type: providerType }),
     },
+    rocket: { name: rocketName },
+    ...(src.mission && {
+      mission: {
+        ...(src.mission.name !== undefined && { name: src.mission.name }),
+        ...(src.mission.description !== undefined && { description: src.mission.description }),
+        ...(orbit !== undefined && { orbit }),
+        ...(src.mission.type !== undefined && { type: src.mission.type }),
+      },
+    }),
+    pad: (() => {
+      const lat = asNumber(src.pad?.latitude);
+      const lon = asNumber(src.pad?.longitude);
+      return {
+        name: src.pad?.name ?? 'Unknown pad',
+        ...(src.pad?.location?.name !== undefined && { locationName: src.pad.location.name }),
+        ...(src.pad?.location?.country_code !== undefined && { countryCode: src.pad.location.country_code }),
+        ...(lat !== undefined && { latitude: lat }),
+        ...(lon !== undefined && { longitude: lon }),
+      };
+    })(),
     webcastLive: src.webcast_live === true,
     webcasts: pickWebcasts(src.vidURLs),
-    weatherConcerns:
-      typeof src.weather_concerns === 'string' && src.weather_concerns.length > 0
-        ? src.weather_concerns
-        : undefined,
-    url: src.url,
+    ...(typeof src.weather_concerns === 'string' && src.weather_concerns.length > 0 && {
+      weatherConcerns: src.weather_concerns,
+    }),
+    ...(src.url !== undefined && { url: src.url }),
   };
 }
 

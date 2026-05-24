@@ -106,7 +106,7 @@ function ActiveStream({ source }: { source: LiveSource }): JSX.Element {
           {source.label} · lookup failed
         </div>
         <p className="mt-2">
-          Couldn't reach the live-detect endpoint. Try again, or open the channel directly.
+          Couldn&apos;t reach the live-detect endpoint. Try again, or open the channel directly.
         </p>
         <div className="mt-3 flex items-center gap-2">
           <button
@@ -136,7 +136,7 @@ function ActiveStream({ source }: { source: LiveSource }): JSX.Element {
           {source.label} · not live right now
         </div>
         <p className="mt-2">
-          This channel doesn't have a current live broadcast. Try another tab — the
+          This channel doesn&apos;t have a current live broadcast. Try another tab — the
           Earth-from-ISS tab is always live.
         </p>
         <div className="mt-3">
@@ -187,8 +187,8 @@ function ActiveStream({ source }: { source: LiveSource }): JSX.Element {
 }
 
 export function LiveStreams(): JSX.Element {
-  const [activeId, setActiveId] = useState<string>(REGISTRY[0].id);
-  const active = REGISTRY.find((r) => r.id === activeId) ?? REGISTRY[0];
+  const [activeId, setActiveId] = useState<string>(REGISTRY[0]!.id);
+  const active = (REGISTRY.find((r) => r.id === activeId) ?? REGISTRY[0])!;
 
   return (
     <section className="rounded-lg border border-mission-edge bg-mission-panel/60 p-4">

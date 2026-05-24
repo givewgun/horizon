@@ -57,13 +57,13 @@ function extractVideoId(html: string): string | null {
   const canonical = html.match(
     /<link\s+rel="canonical"\s+href="https?:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})/i,
   );
-  if (canonical) return canonical[1];
+  if (canonical) return canonical[1]!;
 
   // 2) og:url meta — same story.
   const og = html.match(
     /<meta\s+property="og:url"\s+content="https?:\/\/www\.youtube\.com\/watch\?v=([\w-]{11})/i,
   );
-  if (og) return og[1];
+  if (og) return og[1]!;
 
   // 3) Inline JSON: look for `"videoId":"XXXXXXXXXXX"` paired with
   //    `"isLiveContent":true`. We accept a videoId only when the page also
@@ -71,7 +71,7 @@ function extractVideoId(html: string): string | null {
   const looksLive = /"isLive"\s*:\s*true|"isLiveContent"\s*:\s*true/.test(html);
   if (!looksLive) return null;
   const idMatch = html.match(/"videoId"\s*:\s*"([\w-]{11})"/);
-  return idMatch ? idMatch[1] : null;
+  return idMatch ? idMatch[1]! : null;
 }
 
 export class YouTubeLiveClient {
@@ -101,7 +101,7 @@ export class YouTubeLiveClient {
         const finalUrl = res.url;
         const html = await res.text();
         const idFromUrl = finalUrl.match(/[?&]v=([\w-]{11})/);
-        const videoId = idFromUrl ? idFromUrl[1] : extractVideoId(html);
+        const videoId = idFromUrl ? idFromUrl[1]! : extractVideoId(html);
         return { videoId, isLive: !!videoId };
       } finally {
         clearTimeout(timer);

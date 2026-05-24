@@ -9,10 +9,10 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { ApiResult, FeedStatus, Launch, SpaceWeather, TLE } from '@horizon/shared';
-import { LL2Client } from '../proxy/ll2.js';
-import { SwpcClient } from '../proxy/swpc.js';
-import { CelestrakClient } from '../proxy/celestrak.js';
-import { YouTubeLiveClient, type LiveLookup } from '../proxy/youtube.js';
+import type { LL2Client } from '../proxy/ll2.js';
+import type { SwpcClient } from '../proxy/swpc.js';
+import type { CelestrakClient } from '../proxy/celestrak.js';
+import type { YouTubeLiveClient, LiveLookup } from '../proxy/youtube.js';
 
 interface Deps {
   ll2: LL2Client;

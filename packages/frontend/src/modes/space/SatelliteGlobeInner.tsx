@@ -140,7 +140,7 @@ export function SatelliteGlobeInner(): JSX.Element {
         shouldAnimate: true,
       });
       viewer.scene.globe.enableLighting = true;
-      viewer.scene.skyAtmosphere.show = true;
+      if (viewer.scene.skyAtmosphere) viewer.scene.skyAtmosphere.show = true;
       viewer.scene.backgroundColor = Color.fromCssColorString('#05060a');
 
       // JWST fixed marker.
@@ -186,12 +186,15 @@ export function SatelliteGlobeInner(): JSX.Element {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'cesium init failed');
     }
+    const entities = entitiesRef.current;
+    const satrecs = satrecsRef.current;
+    const presets = presetsRef.current;
     return () => {
       viewerRef.current?.destroy();
       viewerRef.current = null;
-      entitiesRef.current.clear();
-      satrecsRef.current.clear();
-      presetsRef.current.clear();
+      entities.clear();
+      satrecs.clear();
+      presets.clear();
       pinEntityRef.current = null;
     };
   }, [setPin]);
