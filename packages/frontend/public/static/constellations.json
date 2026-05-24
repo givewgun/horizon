@@ -1,0 +1,237 @@
+[
+  {
+    "abbr": "Ori",
+    "name": "Orion",
+    "myth": "The hunter of Greek myth, slain by a scorpion's sting and placed in the sky by Artemis.",
+    "brightestStar": "Rigel",
+    "season": "Winter",
+    "stars": [
+      { "id": "Betelgeuse", "name": "Betelgeuse", "raHours": 5.919, "decDeg": 7.407, "mag": 0.42 },
+      { "id": "Rigel", "name": "Rigel", "raHours": 5.242, "decDeg": -8.202, "mag": 0.13 },
+      { "id": "Bellatrix", "name": "Bellatrix", "raHours": 5.418, "decDeg": 6.350, "mag": 1.64 },
+      { "id": "Saiph", "name": "Saiph", "raHours": 5.796, "decDeg": -9.670, "mag": 2.07 },
+      { "id": "Alnitak", "name": "Alnitak", "raHours": 5.679, "decDeg": -1.943, "mag": 1.74 },
+      { "id": "Alnilam", "name": "Alnilam", "raHours": 5.604, "decDeg": -1.202, "mag": 1.69 },
+      { "id": "Mintaka", "name": "Mintaka", "raHours": 5.533, "decDeg": -0.299, "mag": 2.23 }
+    ],
+    "lines": [
+      ["Betelgeuse", "Bellatrix"],
+      ["Bellatrix", "Mintaka"],
+      ["Mintaka", "Alnilam"],
+      ["Alnilam", "Alnitak"],
+      ["Alnitak", "Saiph"],
+      ["Saiph", "Rigel"],
+      ["Rigel", "Mintaka"],
+      ["Betelgeuse", "Alnitak"]
+    ]
+  },
+  {
+    "abbr": "UMa",
+    "name": "Ursa Major",
+    "myth": "The Great Bear — in Greek lore, Callisto transformed by Hera; the Big Dipper is its hindquarters and tail.",
+    "brightestStar": "Alioth",
+    "season": "Spring",
+    "stars": [
+      { "id": "Dubhe", "name": "Dubhe", "raHours": 11.062, "decDeg": 61.751, "mag": 1.79 },
+      { "id": "Merak", "name": "Merak", "raHours": 11.031, "decDeg": 56.382, "mag": 2.37 },
+      { "id": "Phecda", "name": "Phecda", "raHours": 11.897, "decDeg": 53.695, "mag": 2.44 },
+      { "id": "Megrez", "name": "Megrez", "raHours": 12.257, "decDeg": 57.033, "mag": 3.31 },
+      { "id": "Alioth", "name": "Alioth", "raHours": 12.900, "decDeg": 55.960, "mag": 1.76 },
+      { "id": "Mizar", "name": "Mizar", "raHours": 13.399, "decDeg": 54.925, "mag": 2.23 },
+      { "id": "Alkaid", "name": "Alkaid", "raHours": 13.792, "decDeg": 49.313, "mag": 1.85 }
+    ],
+    "lines": [
+      ["Dubhe", "Merak"],
+      ["Merak", "Phecda"],
+      ["Phecda", "Megrez"],
+      ["Megrez", "Dubhe"],
+      ["Megrez", "Alioth"],
+      ["Alioth", "Mizar"],
+      ["Mizar", "Alkaid"]
+    ]
+  },
+  {
+    "abbr": "Cas",
+    "name": "Cassiopeia",
+    "myth": "The boastful queen, set in the sky to circle the pole forever as punishment for her vanity.",
+    "brightestStar": "Schedar",
+    "season": "Autumn",
+    "stars": [
+      { "id": "Schedar", "name": "Schedar", "raHours": 0.675, "decDeg": 56.537, "mag": 2.24 },
+      { "id": "Caph", "name": "Caph", "raHours": 0.153, "decDeg": 59.150, "mag": 2.28 },
+      { "id": "Gamma", "name": "Gamma Cas", "raHours": 0.945, "decDeg": 60.717, "mag": 2.15 },
+      { "id": "Ruchbah", "name": "Ruchbah", "raHours": 1.430, "decDeg": 60.235, "mag": 2.68 },
+      { "id": "Segin", "name": "Segin", "raHours": 1.907, "decDeg": 63.670, "mag": 3.35 }
+    ],
+    "lines": [
+      ["Caph", "Schedar"],
+      ["Schedar", "Gamma"],
+      ["Gamma", "Ruchbah"],
+      ["Ruchbah", "Segin"]
+    ]
+  },
+  {
+    "abbr": "Sco",
+    "name": "Scorpius",
+    "myth": "The scorpion sent by Gaia to kill Orion — the two never share the sky.",
+    "brightestStar": "Antares",
+    "season": "Summer",
+    "stars": [
+      { "id": "Antares", "name": "Antares", "raHours": 16.490, "decDeg": -26.432, "mag": 1.06 },
+      { "id": "Shaula", "name": "Shaula", "raHours": 17.560, "decDeg": -37.103, "mag": 1.62 },
+      { "id": "Sargas", "name": "Sargas", "raHours": 17.622, "decDeg": -42.998, "mag": 1.86 },
+      { "id": "Dschubba", "name": "Dschubba", "raHours": 16.005, "decDeg": -22.621, "mag": 2.32 },
+      { "id": "Pi", "name": "Pi Sco", "raHours": 15.981, "decDeg": -26.114, "mag": 2.89 }
+    ],
+    "lines": [
+      ["Dschubba", "Pi"],
+      ["Pi", "Antares"],
+      ["Antares", "Sargas"],
+      ["Sargas", "Shaula"]
+    ]
+  },
+  {
+    "abbr": "Leo",
+    "name": "Leo",
+    "myth": "The Nemean lion slain by Heracles — its hide became his armor.",
+    "brightestStar": "Regulus",
+    "season": "Spring",
+    "stars": [
+      { "id": "Regulus", "name": "Regulus", "raHours": 10.139, "decDeg": 11.967, "mag": 1.40 },
+      { "id": "Denebola", "name": "Denebola", "raHours": 11.818, "decDeg": 14.572, "mag": 2.14 },
+      { "id": "Algieba", "name": "Algieba", "raHours": 10.333, "decDeg": 19.842, "mag": 2.01 },
+      { "id": "Zosma", "name": "Zosma", "raHours": 11.235, "decDeg": 20.524, "mag": 2.56 },
+      { "id": "Chertan", "name": "Chertan", "raHours": 11.237, "decDeg": 15.430, "mag": 3.34 }
+    ],
+    "lines": [
+      ["Regulus", "Algieba"],
+      ["Algieba", "Zosma"],
+      ["Zosma", "Denebola"],
+      ["Denebola", "Chertan"],
+      ["Chertan", "Regulus"]
+    ]
+  },
+  {
+    "abbr": "Cyg",
+    "name": "Cygnus",
+    "myth": "The swan — Zeus disguised himself as one in several myths; also called the Northern Cross.",
+    "brightestStar": "Deneb",
+    "season": "Summer",
+    "stars": [
+      { "id": "Deneb", "name": "Deneb", "raHours": 20.690, "decDeg": 45.280, "mag": 1.25 },
+      { "id": "Albireo", "name": "Albireo", "raHours": 19.512, "decDeg": 27.960, "mag": 3.05 },
+      { "id": "Sadr", "name": "Sadr", "raHours": 20.371, "decDeg": 40.257, "mag": 2.23 },
+      { "id": "Gienah", "name": "Gienah", "raHours": 20.770, "decDeg": 33.970, "mag": 2.48 },
+      { "id": "Delta", "name": "Delta Cyg", "raHours": 19.749, "decDeg": 45.131, "mag": 2.87 }
+    ],
+    "lines": [
+      ["Albireo", "Sadr"],
+      ["Sadr", "Deneb"],
+      ["Delta", "Sadr"],
+      ["Sadr", "Gienah"]
+    ]
+  },
+  {
+    "abbr": "Tau",
+    "name": "Taurus",
+    "myth": "The bull form of Zeus that carried Europa across the sea.",
+    "brightestStar": "Aldebaran",
+    "season": "Winter",
+    "stars": [
+      { "id": "Aldebaran", "name": "Aldebaran", "raHours": 4.598, "decDeg": 16.509, "mag": 0.86 },
+      { "id": "Elnath", "name": "Elnath", "raHours": 5.438, "decDeg": 28.608, "mag": 1.65 },
+      { "id": "Alcyone", "name": "Alcyone", "raHours": 3.791, "decDeg": 24.105, "mag": 2.87 }
+    ],
+    "lines": [
+      ["Alcyone", "Aldebaran"],
+      ["Aldebaran", "Elnath"]
+    ]
+  },
+  {
+    "abbr": "Gem",
+    "name": "Gemini",
+    "myth": "The twins Castor and Pollux, inseparable even in death.",
+    "brightestStar": "Pollux",
+    "season": "Winter",
+    "stars": [
+      { "id": "Castor", "name": "Castor", "raHours": 7.577, "decDeg": 31.888, "mag": 1.58 },
+      { "id": "Pollux", "name": "Pollux", "raHours": 7.755, "decDeg": 28.026, "mag": 1.14 },
+      { "id": "Alhena", "name": "Alhena", "raHours": 6.629, "decDeg": 16.399, "mag": 1.92 },
+      { "id": "Wasat", "name": "Wasat", "raHours": 7.335, "decDeg": 21.982, "mag": 3.50 }
+    ],
+    "lines": [
+      ["Castor", "Pollux"],
+      ["Castor", "Wasat"],
+      ["Pollux", "Wasat"],
+      ["Wasat", "Alhena"]
+    ]
+  },
+  {
+    "abbr": "Lyr",
+    "name": "Lyra",
+    "myth": "The lyre of Orpheus, whose music could move stones and tame wild beasts.",
+    "brightestStar": "Vega",
+    "season": "Summer",
+    "stars": [
+      { "id": "Vega", "name": "Vega", "raHours": 18.616, "decDeg": 38.784, "mag": 0.03 },
+      { "id": "Sheliak", "name": "Sheliak", "raHours": 18.834, "decDeg": 33.363, "mag": 3.52 },
+      { "id": "Sulafat", "name": "Sulafat", "raHours": 18.983, "decDeg": 32.690, "mag": 3.25 }
+    ],
+    "lines": [
+      ["Vega", "Sheliak"],
+      ["Sheliak", "Sulafat"],
+      ["Sulafat", "Vega"]
+    ]
+  },
+  {
+    "abbr": "Aql",
+    "name": "Aquila",
+    "myth": "The eagle that carried Zeus's thunderbolts.",
+    "brightestStar": "Altair",
+    "season": "Summer",
+    "stars": [
+      { "id": "Altair", "name": "Altair", "raHours": 19.846, "decDeg": 8.868, "mag": 0.76 },
+      { "id": "Tarazed", "name": "Tarazed", "raHours": 19.771, "decDeg": 10.613, "mag": 2.72 },
+      { "id": "Alshain", "name": "Alshain", "raHours": 19.922, "decDeg": 6.407, "mag": 3.71 }
+    ],
+    "lines": [
+      ["Tarazed", "Altair"],
+      ["Altair", "Alshain"]
+    ]
+  },
+  {
+    "abbr": "Cru",
+    "name": "Crux",
+    "myth": "The Southern Cross — once part of Centaurus; used by mariners to find south.",
+    "brightestStar": "Acrux",
+    "season": "Year-round",
+    "stars": [
+      { "id": "Acrux", "name": "Acrux", "raHours": 12.443, "decDeg": -63.099, "mag": 0.77 },
+      { "id": "Gacrux", "name": "Gacrux", "raHours": 12.519, "decDeg": -57.113, "mag": 1.63 },
+      { "id": "Mimosa", "name": "Mimosa", "raHours": 12.795, "decDeg": -59.689, "mag": 1.25 },
+      { "id": "DeltaCru", "name": "Delta Cru", "raHours": 12.252, "decDeg": -58.749, "mag": 2.79 }
+    ],
+    "lines": [
+      ["Acrux", "Gacrux"],
+      ["Mimosa", "DeltaCru"]
+    ]
+  },
+  {
+    "abbr": "CMa",
+    "name": "Canis Major",
+    "myth": "Orion's greater hunting dog; contains Sirius, the brightest star in Earth's night sky.",
+    "brightestStar": "Sirius",
+    "season": "Winter",
+    "stars": [
+      { "id": "Sirius", "name": "Sirius", "raHours": 6.752, "decDeg": -16.716, "mag": -1.46 },
+      { "id": "Adhara", "name": "Adhara", "raHours": 6.977, "decDeg": -28.972, "mag": 1.50 },
+      { "id": "Wezen", "name": "Wezen", "raHours": 7.140, "decDeg": -26.393, "mag": 1.83 },
+      { "id": "Mirzam", "name": "Mirzam", "raHours": 6.378, "decDeg": -17.956, "mag": 1.98 }
+    ],
+    "lines": [
+      ["Mirzam", "Sirius"],
+      ["Sirius", "Adhara"],
+      ["Adhara", "Wezen"]
+    ]
+  }
+]

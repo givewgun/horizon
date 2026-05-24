@@ -14,8 +14,10 @@
   "dependencies": {
     "@horizon/shared": "workspace:*",
     "@tanstack/react-query": "^5.51.21",
+    "cesium": "^1.119.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "satellite.js": "^5.0.0",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
@@ -30,6 +32,7 @@
     "tailwindcss": "^3.4.7",
     "typescript": "^5.5.4",
     "vite": "^5.3.5",
+    "vite-plugin-cesium": "^1.2.22",
     "vitest": "^2.0.5"
   }
 }

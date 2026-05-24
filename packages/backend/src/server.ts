@@ -5,6 +5,11 @@ import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import { loadConfig } from './config.js';
 import { registerStubRoutes } from './routes/stubs.js';
+import { registerSpaceRoutes } from './routes/space.js';
+import { LL2Client } from './proxy/ll2.js';
+import { SwpcClient } from './proxy/swpc.js';
+import { CelestrakClient } from './proxy/celestrak.js';
+import { YouTubeLiveClient } from './proxy/youtube.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -17,8 +22,14 @@ async function main(): Promise<void> {
     disableRequestLogging: cfg.NODE_ENV === 'production',
   });
 
-  // ---- API stubs (Phase 0). Phase 1+ replaces these one by one. ----
+  // ---- API routes. SPACE mode hits real upstreams; EARTH mode + geocode
+  //      remain stubbed until Phase 2.
+  const ll2 = new LL2Client(cfg.LL2_BASE);
+  const swpc = new SwpcClient();
+  const tle = new CelestrakClient();
+  const youtube = new YouTubeLiveClient();
   await app.register(async (scope) => {
+    registerSpaceRoutes(scope, { ll2, swpc, tle, youtube });
     registerStubRoutes(scope);
   });
 

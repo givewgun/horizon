@@ -101,6 +101,35 @@ export interface SatellitePass {
   endAzimuthDeg: number;
 }
 
+// ---------- Constellations (static catalog shipped with the SPA) ----------
+export interface ConstellationStar {
+  /** Bayer designation or HIP id. */
+  id: string;
+  name: string;
+  /** Right ascension in hours (0..24). */
+  raHours: number;
+  /** Declination in degrees (-90..90). */
+  decDeg: number;
+  /** Apparent visual magnitude (lower = brighter). */
+  mag: number;
+}
+
+export interface Constellation {
+  /** IAU abbreviation, e.g. "Ori". */
+  abbr: string;
+  name: string;
+  /** Short mythology / lore blurb. */
+  myth: string;
+  /** Common name of brightest star. */
+  brightestStar: string;
+  /** Best evening-viewing season at mid-northern latitudes. */
+  season: 'Spring' | 'Summer' | 'Autumn' | 'Winter' | 'Year-round';
+  /** Stars referenced by the line segments below. */
+  stars: ConstellationStar[];
+  /** Pairs of star ids that should be joined to draw the figure. */
+  lines: [string, string][];
+}
+
 // ---------- Space weather ----------
 export interface KpReading {
   /** ISO 8601 UTC */
@@ -111,11 +140,35 @@ export interface KpReading {
   kind: 'observed' | 'estimated' | 'predicted';
 }
 
+export interface SolarWindSnapshot {
+  /** ISO 8601 UTC */
+  time: string;
+  /** Solar-wind bulk speed km/s */
+  speedKms: number;
+  /** Proton density n/cm^3 */
+  densityPcc: number;
+  /** Interplanetary-magnetic-field Bz GSM, nT (negative = southward = aurora-favourable) */
+  bzNt: number;
+}
+
+export interface XrayFluxSnapshot {
+  /** ISO 8601 UTC */
+  time: string;
+  /** GOES short-wavelength flux (0.05–0.4 nm), W/m^2 */
+  shortWm2: number;
+  /** GOES long-wavelength flux (0.1–0.8 nm), W/m^2 — what flare classes index */
+  longWm2: number;
+  /** Letter-class summary derived from longWm2, e.g. "M1.4", "X2.3", "C5.0", "B" */
+  flareClass: string;
+}
+
 export interface SpaceWeather {
   current: KpReading;
   forecast: KpReading[];
   /** 0..1 likelihood of aurora visibility at the requested latitude */
   auroraLikelihood?: number;
+  solarWind?: SolarWindSnapshot;
+  xray?: XrayFluxSnapshot;
   fetchedAt: string;
 }
 
