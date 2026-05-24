@@ -54,6 +54,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [docker]
     if: github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
     steps:
       - name: Deploy to Oracle Cloud VM
         uses: appleboy/ssh-action@v1
@@ -63,15 +65,29 @@ jobs:
           N2YO_KEY: ${{ secrets.N2YO_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPO_CLONE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.ORACLE_VM_HOST }}
           username: ubuntu
           key: ${{ secrets.ORACLE_VM_SSH_KEY }}
           port: 22
-          envs: OPENWEATHER_KEY,WINDY_KEY,N2YO_KEY,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID
+          envs: OPENWEATHER_KEY,WINDY_KEY,N2YO_KEY,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID,REPO_CLONE_TOKEN
           script: |
             set -euo pipefail
-            cd /opt/horizon/app
+            APP_DIR=/opt/horizon/app
+            DATA_DIR=/opt/horizon/app/data
+            REPO_URL="https://x-access-token:${REPO_CLONE_TOKEN}@github.com/givewgun/horizon.git"
+
+            # First-run bootstrap: clone repo + create data dir if missing.
+            # VM already has Docker + tunnel-gateway network from gunvest deploy.
+            if [ ! -d "$APP_DIR/.git" ]; then
+              sudo mkdir -p "$APP_DIR" "$DATA_DIR"
+              sudo chown -R ubuntu:ubuntu /opt/horizon
+              git clone "$REPO_URL" "$APP_DIR"
+            fi
+
+            cd "$APP_DIR"
+            sudo git remote set-url origin "$REPO_URL"
             sudo git pull origin master
 
             # Generate .env.production from secrets each deploy.
