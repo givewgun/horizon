@@ -76,14 +76,26 @@ jobs:
             set -euo pipefail
             APP_DIR=/opt/horizon/app
             DATA_DIR=/opt/horizon/app/data
+            DATA_BAK=/opt/horizon/data.bak
             REPO_URL="https://x-access-token:${REPO_CLONE_TOKEN}@github.com/givewgun/horizon.git"
 
-            # First-run bootstrap: clone repo + create data dir if missing.
-            # VM already has Docker + tunnel-gateway network from gunvest deploy.
+            # First-run bootstrap (or recovery from partial state):
+            # clone repo if .git missing. VM already has Docker + tunnel-gateway
+            # network from gunvest deploy.
             if [ ! -d "$APP_DIR/.git" ]; then
-              sudo mkdir -p "$APP_DIR" "$DATA_DIR"
-              sudo chown -R ubuntu:ubuntu /opt/horizon
-              git clone "$REPO_URL" "$APP_DIR"
+              # Preserve sqlite data across re-bootstrap if it exists.
+              if [ -d "$DATA_DIR" ]; then
+                sudo rm -rf "$DATA_BAK"
+                sudo mv "$DATA_DIR" "$DATA_BAK"
+              fi
+              sudo rm -rf "$APP_DIR"
+              sudo mkdir -p "$(dirname "$APP_DIR")"
+              sudo git clone "$REPO_URL" "$APP_DIR"
+              if [ -d "$DATA_BAK" ]; then
+                sudo mv "$DATA_BAK" "$DATA_DIR"
+              else
+                sudo mkdir -p "$DATA_DIR"
+              fi
             fi
 
             cd "$APP_DIR"
