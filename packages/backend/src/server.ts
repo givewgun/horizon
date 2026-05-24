@@ -10,6 +10,11 @@ import { LL2Client } from './proxy/ll2.js';
 import { SwpcClient } from './proxy/swpc.js';
 import { CelestrakClient } from './proxy/celestrak.js';
 import { YouTubeLiveClient } from './proxy/youtube.js';
+import { OpenMeteoClient } from './proxy/openmeteo.js';
+import { NominatimClient } from './proxy/nominatim.js';
+import { OpenWeatherMapClient } from './proxy/openweathermap.js';
+import { ImageryClient } from './proxy/imagery.js';
+import { WindyClient } from './proxy/windy.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,15 +27,24 @@ async function main(): Promise<void> {
     disableRequestLogging: cfg.NODE_ENV === 'production',
   });
 
-  // ---- API routes. SPACE mode hits real upstreams; EARTH mode + geocode
-  //      remain stubbed until Phase 2.
+  // ---- API routes. SPACE mode hits real upstreams; EARTH mode partially real (forecast + geocode + OWM tiles).
   const ll2 = new LL2Client(cfg.LL2_BASE);
   const swpc = new SwpcClient();
   const tle = new CelestrakClient();
   const youtube = new YouTubeLiveClient();
+  const openmeteo = new OpenMeteoClient();
+  const nominatim = new NominatimClient(cfg.NOMINATIM_USER_AGENT);
+  const imagery = new ImageryClient();
+  const earthDeps: Parameters<typeof registerStubRoutes>[1] = {
+    openmeteo,
+    nominatim,
+    imagery,
+    ...(cfg.features.openWeather && { openweathermap: new OpenWeatherMapClient(cfg.OPENWEATHER_KEY) }),
+    ...(cfg.features.windy && { windy: new WindyClient(cfg.WINDY_KEY) }),
+  };
   await app.register(async (scope) => {
     registerSpaceRoutes(scope, { ll2, swpc, tle, youtube });
-    registerStubRoutes(scope);
+    registerStubRoutes(scope, earthDeps);
   });
 
   // ---- Frontend static (built SPA copied into image at /app/public). ----

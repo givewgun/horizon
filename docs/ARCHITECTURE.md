@@ -1,6 +1,6 @@
 # Architecture
 
-> Snapshot as of **end of Phase 1**. Update at every phase boundary.
+> Snapshot as of **end of Phase 2**. Update at every phase boundary.
 
 ## High-level
 
@@ -14,9 +14,10 @@
 +----------------------+   same-origin    +-----------------------+      +-----------------+
 |   Browser (SPA)      | <-------------- |   Fastify (8080)      | ---> | LL2 / CelesTrak |
 |   React + Vite       |    /api/*       |   serves /dist        |      | NOAA SWPC       |
-|   - CesiumJS (lazy)  |                  |   serves /api/*       |      | Open-Meteo (P2) |
-|   - canvas NightSky  |                  |   runs grammY bot     |      | OWM/Windy   (P2)|
-|   - satellite.js     |                  |   reads SQLite        |      | Nominatim   (P2)|
+|   - CesiumJS (lazy)  |                  |   serves /api/*       |      | Open-Meteo      |
+|   - MapLibre GL      |                  |   runs grammY bot     |      | Nominatim       |
+|   - canvas NightSky  |                  |   reads SQLite        |      | OpenWeatherMap  |
+|   - satellite.js     |                  |                       |      | RainViewer      |
 +----------------------+                  +----------+------------+      +-----------------+
                                                      |
                                                      v
@@ -36,7 +37,7 @@ One Node process serves everything. No CORS. No frontend secrets.
 | `packages/frontend`  | `@horizon/frontend` | Vite SPA. Built into `packages/backend/public` in the Docker image. |
 | `packages/backend`   | `@horizon/backend`  | Fastify + grammY bot + SQLite + proxy routes. |
 
-## Backend layout (Phase 1)
+## Backend layout (Phase 2)
 
 ```
 packages/backend/src/
@@ -49,14 +50,18 @@ packages/backend/src/
     swpc.ts                  SwpcClient (Kp + solar wind + Bz + GOES X-ray + aurora rule)
     celestrak.ts             CelestrakClient (TLE passthrough)
     youtube.ts               YouTubeLiveClient — scrapes /channel/<CID>/live for live videoId
+    openmeteo.ts             OpenMeteoClient (current + hourly + daily forecast, no key needed)
+    nominatim.ts             NominatimClient (forward + reverse geocoding, ≥1 req/s throttle)
+    openweathermap.ts        OpenWeatherMapClient (tile layers, feature-flagged on key)
   routes/
     space.ts                 /api/launches/*, /api/tle/:catnr, /api/spaceweather,
                              /api/live/youtube/:channelId
-    stubs.ts                 remaining Phase 2 stubs + geocode + /api/health
+    stubs.ts                 /api/forecast, /api/geocode, /api/geocode/reverse,
+                             /api/weather/owm-tile/:layer/:z/:x/:y.png, /api/webcams, /api/health
   store/db.ts                SQLite: sent_alerts (Phase 3 bot)
 ```
 
-## Frontend layout (Phase 1)
+## Frontend layout (Phase 2)
 
 ```
 packages/frontend/src/
@@ -64,7 +69,7 @@ packages/frontend/src/
   context/LocationContext.tsx
   components/common/{StatusBadge,GlobalClock,FeedFallback,Skeleton,ErrorBoundary}.tsx
   lib/
-    api.ts                   typed apiGet<T> against /api/*
+    api.ts                   typed apiGet<T>, apiGetWithStatus<T> against /api/*
     time.ts                  formatUtcAndBangkok + countdown
     orbits.ts                satellite.js wrapper (propagation, ground track, passes)
     skymath.ts               GMST, equatorial→alt-az, stereographic projection
@@ -79,7 +84,12 @@ packages/frontend/src/
     SatelliteGlobe.tsx       Suspense + React.lazy boundary
     SatelliteGlobeInner.tsx  Cesium viewer (OSM imagery), groups + NORAD add, click-to-pin, ISS pass list
     LiveStreams.tsx          tabbed live registry, real videoId per channel via /api/live/youtube/:channelId
-  modes/earth/               Phase 2 — still placeholder panels
+  modes/earth/
+    EarthMode.tsx            2x2 grid (WeatherMap, SatelliteImagery, CityWebcams, LocalForecast)
+    WeatherMap.tsx           MapLibre GL JS map, RainViewer radar base, OWM layer toggles, click popup
+    SatelliteImagery.tsx     RAMMB SLIDER iframe, sector + product selector, playback controls
+    CityWebcams.tsx          Windy webcam grid + fallback featured cities, thumbnails → player
+    LocalForecast.tsx        Open-Meteo: current + 24h hourly + 7d daily with WMO code icons
 public/static/constellations.json   curated catalog (see ADR-0003)
 ```
 
@@ -112,7 +122,8 @@ The backend reads `OPENWEATHER_KEY`, `WINDY_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRA
 
 ## What is intentionally NOT done yet
 
-- Open-Meteo / OpenWeatherMap / Windy / Nominatim / RAMMB proxies — Phase 2.
-- Telegram bot wiring (grammY scheduler + `leadWindow` / `selectLink` pure logic + tests) — Phase 3.
+- Telegram bot scheduler (grammY scheduler + `leadWindow` / `selectLink` pure logic + tests, dedup state in SQLite) — Phase 3.
+- Webcam map pins on WeatherMap (integration with Nominatim + CityWebcams state) — Phase 3 polish.
 - Mobile-perf pass for Cesium (it works; reduced-motion + lower-detail toggles are Phase 3 polish).
+- MapLibre terrain/3D (Phase 1-2 uses flat OSM tiles + RainViewer; 3D + terrain are Phase 4+).
 - ISS pass predictions currently use a naive 30 s sampling scan. Good enough for ≥10° peaks at 48 h horizon; if we add a "tonight only" higher-resolution mode in Phase 3, we'll bisect for entry/exit times.

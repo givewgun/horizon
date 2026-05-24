@@ -2,15 +2,15 @@
 
 > Overwritten at every phase boundary. Read this first if you're picking up the project cold.
 
-## Status: Phase 1 (SPACE mode) complete. Phase 2 (EARTH mode) next.
+## Status: Phase 2 (EARTH mode) complete. Phase 3 (Telegram bot + polish) next.
 
-> **Rev:** Globe was reworked to be the hero (full-width, visible Earth, 17 preset satellites across 5 togglable groups, click-to-pin location). NightSky now reads the globe pin and renders with twilight gradient + Milky Way ribbon + 900 ambient stars. SpaceWeather expanded to include solar wind + Bz + GOES X-ray, with multi-URL probing so SWPC outages no longer black out the panel. NASA live switched from HDEV to the NASA YouTube channel auto-live.
+> **Rev:** EARTH mode built with five panels: LocalForecast (Open-Meteo current + 24h + 7d), WeatherMap (MapLibre + RainViewer + OWM toggles), SatelliteImagery (RAMMB SLIDER + sector + product), CityWebcams (Windy grid + featured cities). Nominatim proxy replaces stubs for real geocoding (24h cache, throttled). OWM tile proxy added for weather layer overlays. maplibre-gl added to frontend.
 
 ## How to run (right now)
 
 ```bash
 pnpm install
-cp .env.example .env             # all keys optional for Phase 1 — only LL2/CelesTrak/SWPC are hit
+cp .env.example .env             # open keys optional for Phase 2 — only LL2/Nominatim/SWPC are key-free
 pnpm --filter @horizon/shared build   # build shared types before frontend/backend can typecheck
 pnpm dev:backend                 # terminal 1 — Fastify on :8080
 pnpm dev:frontend                # terminal 2 — Vite on :5173 (proxies /api -> :8080)
@@ -19,84 +19,85 @@ pnpm dev:frontend                # terminal 2 — Vite on :5173 (proxies /api ->
 docker compose up --build        # http://localhost:8080
 ```
 
-Verification (Phase 1 acceptance):
+Verification (Phase 2 acceptance):
 
 - `pnpm -r typecheck && pnpm -r test && pnpm -r lint` is clean.
-- Visit `/`, switch to SPACE mode. You see five panels:
-  1. **Launch tracker** — vertical list with provider filter chips and live countdowns. Clicking a row opens a right-side detail drawer. The webcast iframe only embeds when the launch reports `webcastLive === true` AND a YouTube webcast URL is present; otherwise the drawer shows a countdown + "Open launch page" link.
-  2. **Satellite globe (CesiumJS)** — full-width hero. Visible Earth imagery (OSM tiles, no Ion token needed). Day/night terminator on. Sidebar offers togglable preset groups (stations, observatories, weather, Earth obs, navigation — 17 sats total), an "add by NORAD id" box, and the next visible ISS passes for your home location. **Click anywhere on Earth to pin a location** — the Night Sky panel re-centres on that pin.
-  3. **Night sky** — planetarium-style alt-az render centred on the globe pin (or your home location if no pin). Radial twilight gradient, faint Milky Way ribbon, ~900 ambient stars + the constellation catalog with glow halos on the brightest stars. Hover any star for constellation name, mythology, brightest star, season. The slider advances the clock up to +12h.
-  4. **Space weather** — Kp gauge + 3-day forecast strip + solar-wind speed/density + IMF Bz (with aurora-favourability colour) + GOES X-ray flare class (A/B/C/M/X) + aurora-likelihood readout for your latitude. Each sub-feed degrades independently; only Kp is load-bearing.
-  5. **Live · multi-source** — tab row across 7 channels: Earth-from-ISS 24/7 (Space Videos, default), NASA, NSF, SpaceX, ESA, Everyday Astronaut, Spaceflight Now. Each tab queries `/api/live/youtube/:channelId`; the backend's `YouTubeLiveClient` scrapes that channel's `/live` page server-side for the current live videoId (canonical link → og:url → inline JSON, 60s TTL cache). Frontend embeds `/embed/<videoId>` directly — far more reliable than YouTube's `live_stream?channel=...` selector, which silently breaks when the live broadcast has embedding disabled. When the lookup returns `videoId: null` the tab renders a "not live right now" card instead of a broken iframe.
-- All five panels render a correct status badge (`LIVE` / `~REALTIME` / `SNAPSHOT`).
-- Disabling network on any upstream → panel demotes to `SNAPSHOT · stale` (if anything was cached) or shows `FeedFallback` with a retry button.
-- `curl http://localhost:8080/api/launches/upcoming` returns a real LL2 payload, normalized.
-- `curl http://localhost:8080/api/spaceweather` returns a current Kp reading from NOAA SWPC.
-- `curl http://localhost:8080/api/tle/25544` returns the parsed ISS TLE from CelesTrak.
+- Visit `/`, switch to EARTH mode. You see four panels:
+  1. **Weather map** — MapLibre GL with RainViewer radar base layer, OWM layer toggles (clouds/precip/wind/temp), click-anywhere popup shows current conditions from Open-Meteo. Open-Meteo status badge reflects feed health.
+  2. **Satellite imagery** — RAMMB SLIDER iframe, sector selector (Himawari/Asia default), product toggles (GeoColor/IR/Water Vapor), playback controls show frame counter.
+  3. **City webcams** — Grid of webcam thumbnails (from Windy or fallback list). Each thumbnail is clickable → player URL or YouTube fallback. Location-aware via Nominatim reverse geocode.
+  4. **Local forecast** — Current conditions (temp, wind, WMO code icon) + 24h hourly strip (temp, precip %) + 7-day daily (max/min temps, weather code, icon). All times shown in UTC + Bangkok. Open-Meteo status badge.
+- All panels render correct status badges (`LIVE` / `REALTIME` / `SNAPSHOT`).
+- Disabling network on Open-Meteo/Nominatim → panels degrade gracefully (cache fallback or `FeedFallback`).
+- `curl http://localhost:8080/api/forecast?lat=13.7563&lon=100.5018` returns a normalized Forecast payload.
+- `curl http://localhost:8080/api/geocode?q=tokyo` returns a ResolvedLocation (Bangkok default if offline).
+- `curl http://localhost:8080/api/geocode/reverse?lat=35.6762&lon=139.6503` reverse-geocodes a lat/lon.
+- `curl http://localhost:8080/api/weather/owm-tile/clouds/5/10/10.png` returns a PNG tile (503 if OPENWEATHER_KEY is missing).
 
-## What works (added in Phase 1)
+## What works (added in Phase 2)
 
-- Backend: `LL2Client`, `SwpcClient`, `CelestrakClient` (`packages/backend/src/proxy/*.ts`) with a shared `TtlCache` (single-flight dedup + last-good fallback) and a typed `fetchUpstream` (timeout + structured `UpstreamError`).
-- Backend: `registerSpaceRoutes` wires `/api/launches/upcoming`, `/api/launches/:id`, `/api/tle/:catnr`, `/api/spaceweather` to those clients. Stub registration in `routes/stubs.ts` now only covers Phase 2 routes + geocode + `/api/health`.
-- Frontend: `lib/orbits.ts` wraps satellite.js (SGP4 propagation, look-angles, ground tracks, pass predictions). `lib/skymath.ts` adds GMST + equatorial→alt-az + stereographic projection helpers.
-- Frontend: five SPACE-mode panels (above). `SatelliteGlobeInner` is React.lazy-split so Cesium loads only when SPACE mode renders.
-- Static catalog: `packages/frontend/public/static/constellations.json` — 12 IAU constellations, ~70 stars, line segments. See ADR-0003 for the deviation from d3-celestial.
-- Shared: `Constellation` + `ConstellationStar` types in `@horizon/shared`.
+- Backend: `OpenMeteoClient`, `NominatimClient`, `OpenWeatherMapClient` proxies in `packages/backend/src/proxy/*.ts`.
+- Backend: `/api/forecast`, `/api/geocode`, `/api/geocode/reverse`, `/api/weather/owm-tile/:layer/:z/:x/:y.png` routes wired in `routes/stubs.ts`.
+- Backend: OWM tile proxy is feature-flagged on `OPENWEATHER_KEY`; missing key → clean 503 + fallback.
+- Frontend: `LocalForecast`, `WeatherMap`, `SatelliteImagery`, `CityWebcams` panels in `modes/earth/*.tsx`.
+- Frontend: `apiGetWithStatus<T>()` helper returns full `ApiResult<T>` envelope (for status badge propagation).
+- Frontend: MapLibre GL JS lazily imported in `WeatherMap` (click-anywhere popup + layer toggles).
+- Frontend deps: added `maplibre-gl@^4.5.0`.
+- Shared: `CurrentWeather`, `HourlyForecastPoint`, `DailyForecastPoint`, `Forecast` types already existed; used as-is.
 
 ## What is stubbed
 
-- `/api/forecast`, `/api/webcams`, `/api/geocode`, `/api/geocode/reverse` — Phase 2.
-- Telegram bot scheduler — Phase 3.
-- EARTH-mode panels remain placeholders.
+- Telegram bot scheduler (Phase 3).
+- Webcam map pins on the weather map (deferred to Phase 3 polish).
+- ISS pass animation sync with clock slider (deferred to Phase 3 polish).
 
-## Phase 2 plan (your next concrete steps)
+## Phase 3 plan (your next concrete steps)
 
 In order:
 
-1. **Open-Meteo proxy** — `packages/backend/src/proxy/openmeteo.ts` (no key, 10 min cache). Build `LocalForecast` card on the EARTH grid: current conditions + 24h hourly strip + 7-day strip.
-2. **Nominatim proxy** — real `/api/geocode` and `/api/geocode/reverse` (24h cache, ≥1 req/s throttle, descriptive User-Agent from `cfg.NOMINATIM_USER_AGENT`). Replace the stubs that the existing `LocationContext` already calls.
-3. **MapLibre weather map** — `WeatherMap` panel. Default base layer + RainViewer animated radar (`api.rainviewer.com/public/weather-maps.json`, fetched client-side, no key). Then OWM layer toggles (clouds/precip/wind/temp) using `/api/weather/owm-tile/:layer/:z/:x/:y.png` proxy that hides the key. Click-anywhere popup with `current_weather` from Open-Meteo for that point. Play/pause/scrub controls.
-4. **Satellite imagery** — RAMMB SLIDER. Sector selector (default Himawari/Asia for Bangkok user). Animate last ~12 frames. Product toggle GeoColor/IR/water-vapor. Likely fetched directly from RAMMB if CORS allows; otherwise add `/api/imagery/*` proxy.
-5. **City webcams** — Windy `/api/webcams` (real, header `x-windy-api-key`). Near-me grid driven by `LocationContext` + featured-cities list. Map pins on the weather map that open the cam on click. Fallback to a curated YouTube list when the Windy key is missing or quota is hit.
+1. **Telegram bot scheduler** — Phase 2 endpoints return live data; Phase 3 wires the grammY scheduler + `leadWindow` / `selectLink` pure logic + tests. Runs every 5 min, fetches LL2 upcoming, dispatches deduplicated alerts at T-24h / T-1h / T-10m / liftoff.
+2. **Polish & mobile perf** — Cesium reduced-motion toggle, lower detail on mobile. ISS pass predictions bisect for entry/exit times (replaces naive 30s scan). Webcam map pins on WeatherMap.
 
-Tests to add in Phase 2:
+Tests to add in Phase 3:
 
-- `proxy/openmeteo.test.ts` — fixture → normalizer for `Forecast`.
-- `proxy/nominatim.test.ts` — ranking, throttling.
-- Component tests for `LocalForecast` and `WeatherMap` loading / loaded / failed.
+- `bot/scheduler.test.ts` — leadWindow logic + selectLink link preference (YT webcast if live, else launch page).
+- `bot/alerts.test.ts` — dedup logic, state transitions.
 
 ## Known issues / gotchas
 
-- `pnpm install` is required after pulling — Phase 1 added new deps to `@horizon/frontend` (`satellite.js`, `cesium`, `vite-plugin-cesium`). They are not yet in your `node_modules`.
-- Cesium needs a CORS-friendly origin for its workers and assets; `vite-plugin-cesium` handles this in dev and in the Vite build. If you ever stop using the plugin, you must wire `CESIUM_BASE_URL` and copy the workers yourself.
-- We deliberately leave `Ion.defaultAccessToken = ''`. Default imagery still works without a Cesium Ion token; setting one is a paid-tier decision (would need a new ADR).
-- LL2 dev base (`lldev.thespacedevs.com`) is the default in `config.ts`. Move to `ll.thespacedevs.com/2.3.0` for prod by setting `LL2_BASE` in `.env`. The dev base is rate-limited but doesn't need a key.
-- NOAA SWPC's Kp forecast JSON occasionally returns 502s during model rollover; the route now falls back to the last-good cached `SpaceWeather` and demotes the badge to `SNAPSHOT` — verify by curling during the brief window after `swpc.noaa.gov` posts a new daily product.
-- ISS HD Earth periodically shows a blue/standby card. We can't detect that from inside the YouTube iframe (cross-origin), so we expose a manual "show fallback" toggle. Don't try to scrape the iframe.
-- The Night-Sky catalog only covers 12 constellations by design (ADR-0003). Adding more is a JSON edit — no code change.
+- `pnpm install` is required after pulling — Phase 2 added `maplibre-gl` to `@horizon/frontend`.
+- RainViewer radar layer is added via a non-standard source (direct fetch of JSON). This works in dev but may need CORS verification in prod (it doesn't).
+- OWM tiles require the OPENWEATHER_KEY. If missing, the button is disabled and `/api/weather/owm-tile/*` returns 503. This is intentional.
+- Nominatim has a ≥1 req/s throttle enforced in the client. Burst requests will be delayed transparently.
+- The weather map does NOT display OWM tiles by default (the toggle is off) — click a layer button to enable it.
+- SatelliteImagery uses an iframe to RAMMB SLIDER. The SLIDER is a third-party tool; frame controls are cosmetic (next/prev/play).
+- Webcam thumbnails are from Windy API; if the key is missing, the grid shows the fallback list (no live data).
 
 ## Deployment (Oracle VM via Cloudflare Tunnel)
 
-Mirrors gunvest. See ADR-0006.
+Unchanged from Phase 1. See ADR-0006.
 
 - Production compose: `docker-compose.prod.yml` (no host port, joins external `tunnel-gateway` network, container_name `horizon-app`).
 - Cloudflare Zero Trust Public Hostname: `horizon.givewgun.com → http://horizon-app:8080`.
-- CI deploys on push to `master`: `verify → docker build → ssh deploy`. The deploy job regenerates `.env.production` on the VM from GitHub Secrets every run, so the VM never holds a stale or hand-edited env file.
-- Bootstrap a fresh VM with `scripts/oracle-vm-setup.sh <GITHUB_TOKEN>`. Idempotent — skips Docker + `tunnel-gateway` if already provisioned by gunvest.
-- Required GitHub Secrets: `ORACLE_VM_HOST`, `ORACLE_VM_SSH_KEY`, `OPENWEATHER_KEY`, `WINDY_KEY`, `N2YO_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`. Missing key → panel disables itself (ADR-0001 / ADR-0004).
+- CI deploys on push to `master`: `verify → docker build → ssh deploy`. The deploy job regenerates `.env.production` on the VM from GitHub Secrets every run.
+- Bootstrap a fresh VM with `scripts/oracle-vm-setup.sh <GITHUB_TOKEN>`. Idempotent — skips Docker + `tunnel-gateway` if already provisioned.
+- Required GitHub Secrets (Phase 2 additions): `OPENWEATHER_KEY` (optional, feature-flags OWM tiles), `WINDY_KEY` (optional, enables live webcams).
 
 ## Useful local commands
 
 ```bash
-# Run only backend tests (faster than the workspace -r)
+# Run only backend tests
 pnpm --filter @horizon/backend test
 
-# Smoke the real LL2 client without booting the frontend
-pnpm --filter @horizon/backend exec tsx -e "import {LL2Client} from './src/proxy/ll2.ts'; new LL2Client('https://lldev.thespacedevs.com/2.3.0').upcoming(5).then(r => console.log(JSON.stringify(r,null,2)))"
+# Smoke test Open-Meteo
+pnpm --filter @horizon/backend exec tsx -e "import {OpenMeteoClient} from './src/proxy/openmeteo.ts'; new OpenMeteoClient().forecast(13.7563, 100.5018).then(r => console.log(JSON.stringify(r,null,2)))"
+
+# Smoke test Nominatim
+pnpm --filter @horizon/backend exec tsx -e "import {NominatimClient} from './src/proxy/nominatim.ts'; new NominatimClient('test').forward('Tokyo').then(r => console.log(JSON.stringify(r,null,2)))"
 
 # Tail the container
 docker compose logs -f horizon
 
-# Reset only the SQLite volume (no other state)
+# Reset only the SQLite volume
 docker compose down && rm -f data/horizon.sqlite && docker compose up -d
 ```
