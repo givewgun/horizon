@@ -19,6 +19,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8080
+      # Oculory observability: OTLP traces -> Alloy (reachable over tunnel-gateway).
+      OTEL_SERVICE_NAME: horizon
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://oculory-alloy:4317
     volumes:
       - ./data:/app/data
     healthcheck:

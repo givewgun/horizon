@@ -6,6 +6,7 @@ import fastifyStatic from '@fastify/static';
 import { loadConfig } from './config.js';
 import { registerStubRoutes } from './routes/stubs.js';
 import { registerSpaceRoutes } from './routes/space.js';
+import { registerMetrics } from './instrumentation/metrics.js';
 import { LL2Client } from './proxy/ll2.js';
 import { SwpcClient } from './proxy/swpc.js';
 import { CelestrakClient } from './proxy/celestrak.js';
@@ -26,6 +27,9 @@ async function main(): Promise<void> {
     logger: { level: cfg.NODE_ENV === 'production' ? 'info' : 'debug' },
     disableRequestLogging: cfg.NODE_ENV === 'production',
   });
+
+  // ---- Prometheus metrics: RED hooks + Node runtime + GET /metrics (internal only). ----
+  await registerMetrics(app);
 
   // ---- API routes. SPACE mode hits real upstreams; EARTH mode partially real (forecast + geocode + OWM tiles).
   const ll2 = new LL2Client(cfg.LL2_BASE);

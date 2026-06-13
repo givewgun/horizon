@@ -58,4 +58,6 @@ USER node
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||8080)+'/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
-CMD ["node", "packages/backend/dist/server.js"]
+# --import loads the OpenTelemetry bootstrap (Oculory) before Fastify is imported
+# so HTTP/Fastify auto-instrumentation attaches. Tracing is best-effort/guarded.
+CMD ["node", "--import", "./packages/backend/dist/instrumentation/tracing.js", "packages/backend/dist/server.js"]
